@@ -1,0 +1,58 @@
+# Virtual Environments
+.venv/
+env/
+venv/
+ENV/
+
+# Python Bytecode, Caches & Build Artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Testing & Coverage Artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+.tox/
+.nox/
+
+# Linter & Tooling Caches
+.ruff_cache/
+.mypy_cache/
+
+# Git & Version Control
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# Development & Documentation Artifacts
+notebooks/
+docs/
+scratch/
+tests/
+data/raw/
+data/processed/
+
+# Secrets & Environment Files
+.env
+.env.*
+!.env.example
+
+# Editor & OS Metadata
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+

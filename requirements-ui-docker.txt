@@ -1,0 +1,7 @@
+# ==============================================================================
+# Lean Production Frontend Dependencies for Streamlit Docker Container
+# Contains only libraries strictly required by src/frontend/ (no ML/API runtime)
+# ==============================================================================
+pandas==2.3.3
+httpx==0.28.1
+streamlit==1.67.0

@@ -1,0 +1,48 @@
+{
+  "dataset_name": "wine",
+  "sample_count": 178,
+  "feature_count": 13,
+  "feature_names": [
+    "alcohol",
+    "malic_acid",
+    "ash",
+    "alcalinity_of_ash",
+    "magnesium",
+    "total_phenols",
+    "flavanoids",
+    "nonflavanoid_phenols",
+    "proanthocyanins",
+    "color_intensity",
+    "hue",
+    "od280/od315_of_diluted_wines",
+    "proline"
+  ],
+  "random_state": 42,
+  "test_size": 0.2,
+  "train_samples": 142,
+  "test_samples": 36,
+  "class_distributions": {
+    "total": {
+      "0": 59,
+      "1": 71,
+      "2": 48
+    },
+    "train": {
+      "0": 47,
+      "1": 57,
+      "2": 38
+    },
+    "test": {
+      "0": 12,
+      "1": 14,
+      "2": 10
+    }
+  },
+  "dataset_validation_results": {
+    "missing_values_train": 0,
+    "missing_values_test": 0,
+    "duplicate_samples_in_raw": 0,
+    "features_valid": true,
+    "classes_valid": true
+  }
+}

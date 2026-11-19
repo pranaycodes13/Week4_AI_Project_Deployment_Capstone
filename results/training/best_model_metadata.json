@@ -1,0 +1,18 @@
+{
+  "dataset_name": "wine",
+  "training_samples": 142,
+  "feature_count": 13,
+  "random_state": 42,
+  "cv_folds": 5,
+  "primary_metric": "f1_macro",
+  "selected_model": "svc",
+  "best_hyperparameters": {
+    "classifier__C": 10.0,
+    "classifier__gamma": "scale",
+    "classifier__kernel": "rbf"
+  },
+  "mean_cv_macro_f1": 0.9926570048309179,
+  "std_cv_macro_f1": 0.014685990338164246,
+  "selection_rationale": "Selected 'svc' with highest mean 5-fold CV Macro F1 of 0.9927 (+/- 0.0147). The model demonstrated superior generalization stability across all stratified folds.",
+  "model_architecture": "Pipeline([('scaler', StandardScaler()), ('classifier', ...)])"
+}

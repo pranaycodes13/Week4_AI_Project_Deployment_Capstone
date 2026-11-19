@@ -1,0 +1,4 @@
+model_name,rank,baseline_mean_f1_macro,baseline_std_f1_macro,baseline_mean_accuracy,baseline_mean_precision_macro,baseline_mean_recall_macro,tuned_mean_f1_macro,tuned_std_f1_macro,best_params
+svc,1,0.9864815662344266,0.016659233118207786,0.9862068965517242,0.9865384615384617,0.9877777777777779,0.9926570048309179,0.014685990338164246,"{'classifier__C': 10.0, 'classifier__gamma': 'scale', 'classifier__kernel': 'rbf'}"
+logistic_regression,2,0.9796369712159185,0.027282763728174786,0.9790640394088669,0.9789393939393939,0.9828282828282828,0.9796369712159185,0.027282763728174786,"{'classifier__C': 1.0, 'classifier__solver': 'lbfgs'}"
+random_forest,3,0.9789226855016329,0.028548411231649046,0.9790640394088669,0.9785185185185185,0.9828282828282828,0.9789226855016329,0.028548411231649046,"{'classifier__max_depth': None, 'classifier__min_samples_split': 2, 'classifier__n_estimators': 100}"

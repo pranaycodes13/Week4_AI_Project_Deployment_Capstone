@@ -1,0 +1,196 @@
+{
+  "dataset_name": "wine",
+  "training_sample_count": 142,
+  "feature_count": 13,
+  "cross_validation_strategy": "StratifiedKFold(n_splits=5, shuffle=True, random_state=42)",
+  "primary_metric": "f1_macro",
+  "baseline_cv_results": {
+    "logistic_regression": {
+      "fold_f1_macro": [
+        0.9316017316017314,
+        1.0,
+        1.0,
+        1.0,
+        0.9665831244778613
+      ],
+      "mean_f1_macro": 0.9796369712159185,
+      "std_f1_macro": 0.027282763728174786,
+      "fold_accuracy": [
+        0.9310344827586207,
+        1.0,
+        1.0,
+        1.0,
+        0.9642857142857143
+      ],
+      "mean_accuracy": 0.9790640394088669,
+      "std_accuracy": 0.027713464392187602,
+      "fold_precision_macro": [
+        0.9280303030303031,
+        1.0,
+        1.0,
+        1.0,
+        0.9666666666666667
+      ],
+      "mean_precision_macro": 0.9789393939393939,
+      "std_precision_macro": 0.028541207945078043,
+      "fold_recall_macro": [
+        0.9444444444444445,
+        1.0,
+        1.0,
+        1.0,
+        0.9696969696969697
+      ],
+      "mean_recall_macro": 0.9828282828282828,
+      "std_recall_macro": 0.022496017627596017
+    },
+    "random_forest": {
+      "fold_f1_macro": [
+        0.9280303030303031,
+        1.0,
+        1.0,
+        1.0,
+        0.9665831244778613
+      ],
+      "mean_f1_macro": 0.9789226855016329,
+      "std_f1_macro": 0.028548411231649046,
+      "fold_accuracy": [
+        0.9310344827586207,
+        1.0,
+        1.0,
+        1.0,
+        0.9642857142857143
+      ],
+      "mean_accuracy": 0.9790640394088669,
+      "std_accuracy": 0.027713464392187602,
+      "fold_precision_macro": [
+        0.9259259259259259,
+        1.0,
+        1.0,
+        1.0,
+        0.9666666666666667
+      ],
+      "mean_precision_macro": 0.9785185185185185,
+      "std_precision_macro": 0.02929439990116324,
+      "fold_recall_macro": [
+        0.9444444444444445,
+        1.0,
+        1.0,
+        1.0,
+        0.9696969696969697
+      ],
+      "mean_recall_macro": 0.9828282828282828,
+      "std_recall_macro": 0.022496017627596017
+    },
+    "svc": {
+      "fold_f1_macro": [
+        0.9632850241545894,
+        0.9691228070175438,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "mean_f1_macro": 0.9864815662344266,
+      "std_f1_macro": 0.016659233118207786,
+      "fold_accuracy": [
+        0.9655172413793104,
+        0.9655172413793104,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "mean_accuracy": 0.9862068965517242,
+      "std_accuracy": 0.01689303270884948,
+      "fold_precision_macro": [
+        0.9583333333333334,
+        0.9743589743589745,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "mean_precision_macro": 0.9865384615384617,
+      "std_precision_macro": 0.01724823595778678,
+      "fold_recall_macro": [
+        0.9722222222222222,
+        0.9666666666666667,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "mean_recall_macro": 0.9877777777777779,
+      "std_recall_macro": 0.015071844406945041
+    }
+  },
+  "tuned_cv_results": {
+    "logistic_regression": {
+      "best_params": {
+        "classifier__C": 1.0,
+        "classifier__solver": "lbfgs"
+      },
+      "best_f1_macro_mean": 0.9796369712159185,
+      "best_f1_macro_std": 0.027282763728174786
+    },
+    "random_forest": {
+      "best_params": {
+        "classifier__max_depth": null,
+        "classifier__min_samples_split": 2,
+        "classifier__n_estimators": 100
+      },
+      "best_f1_macro_mean": 0.9789226855016329,
+      "best_f1_macro_std": 0.028548411231649046
+    },
+    "svc": {
+      "best_params": {
+        "classifier__C": 10.0,
+        "classifier__gamma": "scale",
+        "classifier__kernel": "rbf"
+      },
+      "best_f1_macro_mean": 0.9926570048309179,
+      "best_f1_macro_std": 0.014685990338164246
+    }
+  },
+  "selection_decision": {
+    "selected_model": "svc",
+    "best_params": {
+      "classifier__C": 10.0,
+      "classifier__gamma": "scale",
+      "classifier__kernel": "rbf"
+    },
+    "mean_cv_macro_f1": 0.9926570048309179,
+    "std_cv_macro_f1": 0.014685990338164246,
+    "model_selection_rationale": "Selected 'svc' with highest mean 5-fold CV Macro F1 of 0.9927 (+/- 0.0147). The model demonstrated superior generalization stability across all stratified folds.",
+    "ranking": [
+      {
+        "rank": 1,
+        "model_name": "svc",
+        "mean_f1_macro": 0.9926570048309179,
+        "std_f1_macro": 0.014685990338164246,
+        "best_params": {
+          "classifier__C": 10.0,
+          "classifier__gamma": "scale",
+          "classifier__kernel": "rbf"
+        }
+      },
+      {
+        "rank": 2,
+        "model_name": "logistic_regression",
+        "mean_f1_macro": 0.9796369712159185,
+        "std_f1_macro": 0.027282763728174786,
+        "best_params": {
+          "classifier__C": 1.0,
+          "classifier__solver": "lbfgs"
+        }
+      },
+      {
+        "rank": 3,
+        "model_name": "random_forest",
+        "mean_f1_macro": 0.9789226855016329,
+        "std_f1_macro": 0.028548411231649046,
+        "best_params": {
+          "classifier__max_depth": null,
+          "classifier__min_samples_split": 2,
+          "classifier__n_estimators": 100
+        }
+      }
+    ]
+  }
+}

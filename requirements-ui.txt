@@ -1,0 +1,7 @@
+# ==============================================================================
+# Frontend UI Dependencies for Wine Classification & Prediction Service
+# Inherits backend/runtime baseline and pins Streamlit
+# ==============================================================================
+-r requirements.txt
+streamlit==1.67.0
+
