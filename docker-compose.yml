@@ -5,11 +5,32 @@ services:
       dockerfile: Dockerfile
     image: wine-classification-api:latest
     container_name: wine_classification_api
+    init: true
     ports:
-      - "${API_PORT:-8000}:8000"
+      - "127.0.0.1:${API_PORT:-8000}:8000"
     environment:
       - HOST=0.0.0.0
       - PORT=8000
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+        reservations:
+          cpus: "0.10"
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     restart: unless-stopped
     healthcheck:
       test:
@@ -28,12 +49,30 @@ services:
       dockerfile: Dockerfile.ui
     image: wine-classification-ui:latest
     container_name: wine_classification_ui
+    init: true
     ports:
-      - "${UI_PORT:-8501}:8501"
+      - "127.0.0.1:${UI_PORT:-8501}:8501"
     environment:
       - API_BASE_URL=http://wine-api:8000
       - STREAMLIT_SERVER_HEADLESS=true
       - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+        reservations:
+          cpus: "0.10"
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     restart: unless-stopped
     depends_on:
       wine-api:

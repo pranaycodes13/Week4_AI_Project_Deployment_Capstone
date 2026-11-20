@@ -10,6 +10,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
+from src.api.logging_utils import (
+    CorrelationAndAccessLogMiddleware,
+    get_current_request_id,
+    setup_logging,
+)
 from src.api.service import (
     ModelIncompatibleError,
     ModelNotLoadedError,
@@ -32,14 +37,24 @@ logger = logging.getLogger("wine_api")
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Lifespan context manager handling application startup and shutdown."""
+    setup_logging()
     # Attempt to load model artifact on startup
     try:
         app.state.model_service.load_model()
-        logger.info("Wine classification model loaded successfully.")
+        logger.info(
+            "Wine classification model loaded successfully.",
+            extra={"event": "startup"},
+        )
     except (ModelServiceError, FileNotFoundError, OSError) as exc:
-        logger.warning(f"Model could not be loaded at startup: {exc}")
+        logger.warning(
+            f"Model could not be loaded at startup: {exc}",
+            extra={"event": "startup_warning"},
+        )
     yield
-    logger.info("Wine classification service shutting down.")
+    logger.info(
+        "Wine classification service shutting down.",
+        extra={"event": "shutdown"},
+    )
 
 
 def create_app(service_instance: WineModelService | None = None) -> FastAPI:
@@ -66,6 +81,9 @@ def create_app(service_instance: WineModelService | None = None) -> FastAPI:
     # Attach service instance to application state
     app.state.model_service = service_instance or model_service
 
+    # Attach correlation and structured access logging middleware
+    app.add_middleware(CorrelationAndAccessLogMiddleware)
+
     # --- Exception Handlers ---
 
     @app.exception_handler(RequestValidationError)
@@ -73,6 +91,7 @@ def create_app(service_instance: WineModelService | None = None) -> FastAPI:
         request: Request, exc: RequestValidationError
     ) -> JSONResponse:
         """Handle request schema validation errors with clean structured response."""
+        req_id = getattr(request.state, "request_id", None) or get_current_request_id()
         errors: list[dict[str, Any]] = []
         for err in exc.errors():
             loc = " -> ".join(str(part) for part in err.get("loc", []))
@@ -84,12 +103,14 @@ def create_app(service_instance: WineModelService | None = None) -> FastAPI:
                     "type": err.get("type", "value_error"),
                 }
             )
+        headers = {"X-Request-ID": req_id} if req_id else None
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             content={
                 "error": "Input Validation Error",
                 "detail": errors,
             },
+            headers=headers,
         )
 
     @app.exception_handler(ModelNotLoadedError)
@@ -97,12 +118,19 @@ def create_app(service_instance: WineModelService | None = None) -> FastAPI:
         request: Request, exc: ModelNotLoadedError
     ) -> JSONResponse:
         """Handle missing or unloaded model requests."""
+        req_id = getattr(request.state, "request_id", None) or get_current_request_id()
+        logger.warning(
+            f"Model not loaded for request {request.method} {request.url.path}: {exc}",
+            extra={"event": "model_not_loaded", "request_id": req_id},
+        )
+        headers = {"X-Request-ID": req_id} if req_id else None
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={
                 "error": "Service Unavailable",
                 "detail": "Model artifact is currently not loaded or unavailable for inference.",
             },
+            headers=headers,
         )
 
     @app.exception_handler(ModelIncompatibleError)
@@ -110,12 +138,19 @@ def create_app(service_instance: WineModelService | None = None) -> FastAPI:
         request: Request, exc: ModelIncompatibleError
     ) -> JSONResponse:
         """Handle corrupted or incompatible model artifacts."""
+        req_id = getattr(request.state, "request_id", None) or get_current_request_id()
+        logger.error(
+            f"Model incompatible for request {request.method} {request.url.path}: {exc}",
+            extra={"event": "model_incompatible", "request_id": req_id},
+        )
+        headers = {"X-Request-ID": req_id} if req_id else None
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={
                 "error": "Service Unavailable",
                 "detail": "Model artifact is incompatible or damaged.",
             },
+            headers=headers,
         )
 
     @app.exception_handler(Exception)
@@ -123,13 +158,20 @@ def create_app(service_instance: WineModelService | None = None) -> FastAPI:
         request: Request, exc: Exception
     ) -> JSONResponse:
         """Sanitize unexpected server exceptions, preventing stack trace or path exposure."""
-        logger.error(f"Internal server error: {exc}")
+        req_id = getattr(request.state, "request_id", None) or get_current_request_id()
+        logger.error(
+            f"Internal server error: {exc}",
+            exc_info=exc,
+            extra={"event": "internal_server_error", "request_id": req_id},
+        )
+        headers = {"X-Request-ID": req_id} if req_id else None
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
                 "error": "Internal Server Error",
                 "detail": "An internal server error occurred while processing the request.",
             },
+            headers=headers,
         )
 
     # --- Routes ---
