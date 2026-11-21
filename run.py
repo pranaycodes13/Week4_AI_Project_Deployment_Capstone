@@ -4,6 +4,7 @@ Supports pipeline execution, model training, evaluation, test suite running, and
 """
 
 import argparse
+import os
 import subprocess
 import sys
 
@@ -46,11 +47,12 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.command == "serve":
-        port = args.port or 8000
-        print(f"Starting FastAPI Wine Classification API server at http://{args.host}:{port}")
+        port = args.port or int(os.getenv("PORT", "8000"))
+        host = args.host if args.host != "127.0.0.1" else os.getenv("HOST", "127.0.0.1")
+        print(f"Starting FastAPI Wine Classification API server at http://{host}:{port}")
         uvicorn.run(
             "src.api.app:app",
-            host=args.host,
+            host=host,
             port=port,
             reload=args.reload,
         )

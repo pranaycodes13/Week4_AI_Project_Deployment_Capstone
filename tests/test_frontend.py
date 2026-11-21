@@ -349,6 +349,27 @@ def test_timeout_handling() -> None:
         api.health()
 
 
+def test_timeout_configuration_and_env_overrides(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify default timeout values (15s connect, 90s read) and env overrides."""
+    # 1. Default instance matches 15s connect and 90s read
+    api_default = WineApiClient(base_url="http://testserver")
+    assert api_default.timeout.connect == 15.0
+    assert api_default.timeout.read == 90.0
+
+    # 2. Explicit constructor parameters override module defaults
+    api_custom = WineApiClient(base_url="http://testserver", connect_timeout=10.0, request_timeout=45.0)
+    assert api_custom.timeout.connect == 10.0
+    assert api_custom.timeout.read == 45.0
+
+    # 3. Environment variable overrides dynamically respected
+    monkeypatch.setenv("API_CONNECT_TIMEOUT", "20.0")
+    monkeypatch.setenv("API_REQUEST_TIMEOUT", "120.0")
+
+    api_env = WineApiClient(base_url="http://testserver")
+    assert api_env.timeout.connect == 20.0
+    assert api_env.timeout.read == 120.0
+
+
 def test_invalid_json_handling() -> None:
     """Verify invalid JSON response raises ApiResponseError."""
     def handler(request: httpx.Request) -> httpx.Response:

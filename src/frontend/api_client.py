@@ -1,5 +1,6 @@
 """HTTP client for communicating with the Wine Classification & Prediction FastAPI service."""
 
+import contextlib
 import json
 import math
 import os
@@ -11,12 +12,12 @@ import httpx
 from src.config import WINE_FEATURE_NAMES
 
 DEFAULT_API_BASE_URL: str = "http://127.0.0.1:8000"
-DEFAULT_CONNECT_TIMEOUT: float = 5.0
-DEFAULT_REQUEST_TIMEOUT: float = 15.0
+DEFAULT_CONNECT_TIMEOUT: float = 15.0
+DEFAULT_REQUEST_TIMEOUT: float = 90.0
 
 
 def resolve_api_base_url(session_override: str | None = None) -> str:
-    """Resolve API base URL respecting precedence: session override -> API_BASE_URL -> API_URL -> local default.
+    """Resolve API base URL respecting precedence: session override -> API_BASE_URL -> API_URL -> st.secrets -> local default.
 
     Args:
         session_override: Optional explicit URL override (e.g., from Streamlit session state or user input).
@@ -29,6 +30,15 @@ def resolve_api_base_url(session_override: str | None = None) -> str:
     env_url = os.getenv("API_BASE_URL") or os.getenv("API_URL")
     if env_url and env_url.strip():
         return env_url.strip().rstrip("/")
+
+    # Fallback to Streamlit Community Cloud st.secrets if configured
+    with contextlib.suppress(KeyError, AttributeError, FileNotFoundError):
+        import streamlit as st
+
+        secret_url = st.secrets.get("API_BASE_URL") or st.secrets.get("API_URL")
+        if secret_url and str(secret_url).strip():
+            return str(secret_url).strip().rstrip("/")
+
     return DEFAULT_API_BASE_URL
 
 
@@ -116,20 +126,30 @@ class WineApiClient:
     def __init__(
         self,
         base_url: str | None = None,
-        connect_timeout: float = DEFAULT_CONNECT_TIMEOUT,
-        request_timeout: float = DEFAULT_REQUEST_TIMEOUT,
+        connect_timeout: float | None = None,
+        request_timeout: float | None = None,
         client: httpx.Client | None = None,
     ) -> None:
         """Initialize API client.
 
         Args:
             base_url: Base URL of FastAPI service. Defaults to env var API_BASE_URL or http://127.0.0.1:8000.
-            connect_timeout: Seconds to wait for socket connection.
-            request_timeout: Seconds to wait for response read.
+            connect_timeout: Seconds to wait for socket connection. Defaults to API_CONNECT_TIMEOUT or 15.0s.
+            request_timeout: Seconds to wait for response read. Defaults to API_REQUEST_TIMEOUT or 90.0s.
             client: Optional injected httpx.Client (useful for unit testing).
         """
         self.base_url = resolve_api_base_url(base_url)
-        self.timeout = httpx.Timeout(timeout=request_timeout, connect=connect_timeout)
+        c_timeout = (
+            connect_timeout
+            if connect_timeout is not None
+            else float(os.getenv("API_CONNECT_TIMEOUT", str(DEFAULT_CONNECT_TIMEOUT)))
+        )
+        r_timeout = (
+            request_timeout
+            if request_timeout is not None
+            else float(os.getenv("API_REQUEST_TIMEOUT", str(DEFAULT_REQUEST_TIMEOUT)))
+        )
+        self.timeout = httpx.Timeout(timeout=r_timeout, connect=c_timeout)
         self._custom_client = client
         self._client: httpx.Client | None = client
 
